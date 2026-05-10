@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 globalThis.require = createRequire(import.meta.url);
 import startServer from './server.js';
-startServer();
+await startServer();
 
 // src/index.ts
 import { Client as Client6, GatewayIntentBits, Partials } from "discord.js";
@@ -1988,3 +1988,11 @@ client.login(process.env.DISCORD_TOKEN).catch((err) => {
   console.error("Failed to login:", err);
   process.exit(1);
 });
+
+function shutdown(signal) {
+  console.log(`Received ${signal} — shutting down cleanly.`);
+  client.destroy();
+  process.exit(0);
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
