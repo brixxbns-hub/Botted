@@ -377,7 +377,7 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
       if (!isAdminUser) return false;
       const embed = new EmbedBuilder2().setColor(15770880).setTitle("Middleman Service").setDescription(
         "Found a trade and would like to ensure a safe trading experience?\n\n**Open a ticket below**\n\n**What we provide**\n\u2022 Safe trades between 2 parties\n\u2022 Fast and easy deals\n\n**Important notes**\n\u2022 Both parties must agree before opening a ticket\n\u2022 Fake/Troll tickets will result in a ban\n\u2022 Follow Discord ToS and server guidelines"
-      ).setThumbnail("https://images-ext-1.discordapp.net/external/vIAK_B5SmAoS8mLPN6JN7eKwO3tjzQxoVOB9vkav3EY/https/cdn.discordapp.com/icons/1144307790148546700/a_78d5469e970cf8548f6564daf193e8a5.gif");
+      );
       if (config.ticket_banner) embed.setImage(config.ticket_banner);
       const row = new ActionRowBuilder2().addComponents(
         new ButtonBuilder2().setCustomId("ticket_open").setLabel("Request").setStyle(ButtonStyle2.Success).setEmoji("\u2705")
@@ -1732,7 +1732,7 @@ async function handleModal(modal) {
   const member = await guild.members.fetch(modal.user.id);
   const color = parseInt((config.ticket_color || "#5865F2").replace("#", ""), 16);
   const supportRole = config.support_role ? `<@&${config.support_role}>` : "@unknown-role";
-  const embed = new EmbedBuilder6().setColor(color).setTitle(config.ticket_title || "Support Ticket").setThumbnail(member.displayAvatarURL({ size: 256 })).addFields(
+  const embed = new EmbedBuilder6().setColor(color).setTitle(config.ticket_title || "Support Ticket").addFields(
     { name: "User", value: `${modal.user} (${modal.user.tag})`, inline: true },
     { name: "User ID", value: modal.user.id, inline: true },
     { name: "Account Age", value: `${Math.floor((Date.now() - modal.user.createdTimestamp) / 864e5)} days`, inline: true },
