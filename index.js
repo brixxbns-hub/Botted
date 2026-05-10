@@ -776,22 +776,24 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
   const guildId = message.guild.id;
   switch (command) {
     case "mmfee": {
-      if (args.length > 0 && isAdminUser) {
+      if (!isAdminUser) return false;
+      if (args.length > 0) {
         updateGuildConfig(guildId, { mm_fee: args.join(" ") });
         await message.reply({ embeds: [successEmbed("MM Fee Updated", `Fee set to: **${args.join(" ")}**`)] });
         return true;
       }
-      const feeDesc = [
-        "**__Middleman Fee__ \u{1F4B0}**\n",
-        `\u2022 The Middleman fee is **${config.mm_fee || "5%"}** \u2014 this is compulsory since you are using our MM service.\n`,
-        "\u2022 **50/50** \u{1F451} \u2014 Both parties split the fee equally.",
-        "\u2022 **100%** \u{1FA99} \u2014 One party covers the full fee.\n",
-        "\u2022 **__Click below and choose an option__**"
-      ].join("\n");
-      const feeEmbed = new EmbedBuilder3().setColor(5793266).setDescription(feeDesc);
+      const feeEmbed = new EmbedBuilder3()
+        .setColor(5793266)
+        .setTitle("1  __Middleman Fee Agreement__ \u{1F4CC}")
+        .setDescription(
+          "\u2022 Choose an option on how the Middleman fees will be paid \u{1FA99}\n\n" +
+          "\u2022 50/50 \u2705 Both parties spilt fees equally \u{1F99D}\n\n" +
+          "\u2022 100% \u{1FA99} one party pays the full fees\n\n" +
+          "\u2022 **__Click below and choose an option__**"
+        );
       const feeRow = new ActionRowBuilder3().addComponents(
         new ButtonBuilder3().setCustomId("mmfee_5050").setLabel("50/50").setStyle(ButtonStyle3.Success).setEmoji("\u{1F451}"),
-        new ButtonBuilder3().setCustomId("mmfee_100").setLabel("100%").setStyle(ButtonStyle3.Success).setEmoji("\u{1FA99}")
+        new ButtonBuilder3().setCustomId("mmfee_100").setLabel("100%").setStyle(ButtonStyle3.Danger).setEmoji("\u{1FA99}")
       );
       await message.channel.send({ embeds: [feeEmbed], components: [feeRow] });
       await message.delete().catch(() => {});
@@ -1664,11 +1666,11 @@ async function handleButton(btn) {
     return;
   }
   if (customId === "mmfee_5050") {
-    await btn.reply({ content: `\u{1F451} ${btn.user} has agreed to cover **50%** of the middleman fee.` });
+    await btn.reply({ content: `\u{1F451} ${btn.user} has agreed to cover **50%** of the middleman fee.`, ephemeral: false });
     return;
   }
   if (customId === "mmfee_100") {
-    await btn.reply({ content: `\u{1FA99} ${btn.user} has agreed to cover **100%** of the middleman fee.` });
+    await btn.reply({ content: `\u{1FA99} ${btn.user} has agreed to cover **100%** of the middleman fee.`, ephemeral: false });
     return;
   }
   if (customId === "mminfo_understood") {
