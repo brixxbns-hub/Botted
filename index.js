@@ -1732,7 +1732,7 @@ async function handleModal(modal) {
   const member = await guild.members.fetch(modal.user.id);
   const color = parseInt((config.ticket_color || "#5865F2").replace("#", ""), 16);
   const supportRole = config.support_role ? `<@&${config.support_role}>` : "@unknown-role";
-  const embed = new EmbedBuilder6().setColor(color).setTitle(config.ticket_title || "Support Ticket").addFields(
+  const embed = new EmbedBuilder6().setColor(color).setTitle(config.ticket_title || "Support Ticket").setThumbnail(member.displayAvatarURL({ size: 256 })).addFields(
     { name: "User", value: `${modal.user} (${modal.user.tag})`, inline: true },
     { name: "User ID", value: modal.user.id, inline: true },
     { name: "Account Age", value: `${Math.floor((Date.now() - modal.user.createdTimestamp) / 864e5)} days`, inline: true },
