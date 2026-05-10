@@ -13,7 +13,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
-var DATA_DIR = path.join(__dirname, "data");
+var DATA_DIR = path.join(__dirname, "../../data");
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 var DB_PATH = path.join(DATA_DIR, "bot.db");
 var db = new DatabaseSync(DB_PATH);
@@ -297,7 +297,8 @@ async function sendTranscript(guild, channelId, ticketChannelId, userId) {
     const transcript = sorted.map(
       (m) => `[${new Date(m.createdTimestamp).toISOString()}] ${m.author.tag}: ${m.content}`
     ).join("\n");
-    const embed = new EmbedBuilder().setColor(5793266).setTitle("\u{1F4CB} Ticket Transcript").setDescription(`Ticket: <#${ticketChannelId}>\nUser: <@${userId}>`).setTimestamp();
+    const embed = new EmbedBuilder().setColor(5793266).setTitle("\u{1F4CB} Ticket Transcript").setDescription(`Ticket: <#${ticketChannelId}>
+User: <@${userId}>`).setTimestamp();
     await transcriptChannel.send({
       embeds: [embed],
       files: [
@@ -381,7 +382,8 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
         new ButtonBuilder2().setCustomId("ticket_open").setLabel("Request").setStyle(ButtonStyle2.Success).setEmoji("\u2705")
       );
       await message.channel.send({ embeds: [embed], components: [row] });
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       return true;
     }
     case "setticket": {
@@ -533,7 +535,11 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
         await message.reply({ embeds: [errorEmbed("Usage", "$createcmd <commandname>")] });
         return true;
       }
-      await message.reply({ embeds: [infoEmbed("Create Command", `Creating command **$${cmdName}**\n\nAnswer the following prompts (type \`skip\` to skip):\n\n**Title:**`)] });
+      await message.reply({ embeds: [infoEmbed("Create Command", `Creating command **$${cmdName}**
+
+Answer the following prompts (type \`skip\` to skip):
+
+**Title:**`)] });
       const collected = await collectEmbedData(message);
       if (!collected) return true;
       saveCustomCommand(guildId, cmdName, collected);
@@ -571,7 +577,7 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
         return true;
       }
       const current = config.auto_vouch_users || [];
-      const merged = [...new Set([...current, ...userIds])];
+      const merged = [.../* @__PURE__ */ new Set([...current, ...userIds])];
       updateGuildConfig(guildId, { auto_vouch_users: merged });
       await message.reply({ embeds: [successEmbed("Auto Vouch Users Added", `Added ${userIds.length} user(s) to auto vouch pool.`)] });
       return true;
@@ -633,11 +639,13 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
           failed++;
         }
         if (sent % 10 === 0) {
-          await statusMsg.edit({ embeds: [infoEmbed("Mass DM Progress", `Sent: ${sent} | Failed: ${failed} | Remaining: ${humanMembers.size - sent - failed}`)] }).catch(() => {});
+          await statusMsg.edit({ embeds: [infoEmbed("Mass DM Progress", `Sent: ${sent} | Failed: ${failed} | Remaining: ${humanMembers.size - sent - failed}`)] }).catch(() => {
+          });
         }
         await new Promise((r) => setTimeout(r, 1e3));
       }
-      await statusMsg.edit({ embeds: [successEmbed("Mass DM Complete", `Sent: ${sent} | Failed: ${failed}`)] }).catch(() => {});
+      await statusMsg.edit({ embeds: [successEmbed("Mass DM Complete", `Sent: ${sent} | Failed: ${failed}`)] }).catch(() => {
+      });
       return true;
     }
     case "antispam": {
@@ -781,7 +789,8 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
       }
       const feeDesc = [
         "**__Middleman Fee__ \u{1F4B0}**\n",
-        `\u2022 The Middleman fee is **${config.mm_fee || "5%"}** \u2014 this is compulsory since you are using our MM service.\n`,
+        `\u2022 The Middleman fee is **${config.mm_fee || "5%"}** \u2014 this is compulsory since you are using our MM service.
+`,
         "\u2022 **50/50** \u{1F451} \u2014 Both parties split the fee equally.",
         "\u2022 **100%** \u{1FA99} \u2014 One party covers the full fee.\n",
         "\u2022 **__Click below and choose an option__**"
@@ -792,7 +801,8 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
         new ButtonBuilder3().setCustomId("mmfee_100").setLabel("100%").setStyle(ButtonStyle3.Success).setEmoji("\u{1FA99}")
       );
       await message.channel.send({ embeds: [feeEmbed], components: [feeRow] });
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       return true;
     }
     case "mminfo": {
@@ -825,10 +835,11 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
       if (config.mm_image) embed.setImage(config.mm_image);
       const row = new ActionRowBuilder3().addComponents(
         new ButtonBuilder3().setCustomId("mminfo_understood").setLabel("Understood").setStyle(ButtonStyle3.Success).setEmoji("\u2705"),
-        new ButtonBuilder3().setCustomId("mminfo_not_understood").setLabel("Not Understood").setStyle(ButtonStyle3.Danger).setEmoji("\u2753")
+        new ButtonBuilder3().setCustomId("mminfo_not_understood").setLabel("Not understood").setStyle(ButtonStyle3.Danger).setEmoji("\u{1F622}")
       );
       await message.channel.send({ embeds: [embed], components: [row] });
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       return true;
     }
     case "confirm": {
@@ -840,7 +851,8 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
         new ButtonBuilder3().setCustomId("decline_trade").setLabel("Decline").setStyle(ButtonStyle3.Danger).setEmoji("\u274C")
       );
       await message.channel.send({ embeds: [confirmEmbed], components: [confirmRow] });
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       return true;
     }
     case "blunderbluss": {
@@ -851,7 +863,8 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
         new ButtonBuilder3().setCustomId("blunderbluss_accept").setLabel("Accept").setStyle(ButtonStyle3.Success).setEmoji("\u2705")
       );
       await message.channel.send({ embeds: [embed], components: [row] });
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       return true;
     }
     case "close": {
@@ -869,7 +882,8 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
       setTimeout(async () => {
         try {
           await message.channel.delete();
-        } catch {}
+        } catch {
+        }
       }, 5e3);
       return true;
     }
@@ -979,8 +993,10 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
           if (config.ticket_transcript_channel) await sendTranscript(message.guild, config.ticket_transcript_channel, t.channel_id, "");
           updateTicket(t.channel_id, { status: "closed" });
           const ch = message.guild.channels.cache.get(t.channel_id);
-          if (ch) await ch.delete().catch(() => {});
-        } catch {}
+          if (ch) await ch.delete().catch(() => {
+          });
+        } catch {
+        }
       }
       return true;
     }
@@ -996,7 +1012,7 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
           { name: "User ID", value: member.user.id, inline: true },
           { name: "Nickname", value: member.nickname || "None", inline: true },
           { name: "Account Created", value: accountAge(member.user.createdAt), inline: true },
-          { name: "Joined Server", value: accountAge(member.joinedAt || new Date()), inline: true },
+          { name: "Joined Server", value: accountAge(member.joinedAt || /* @__PURE__ */ new Date()), inline: true },
           { name: "Vouches", value: `\u2B50 ${vouches}`, inline: true },
           { name: "Roles", value: roles },
           { name: "Bot?", value: member.user.bot ? "Yes" : "No", inline: true },
@@ -1190,19 +1206,21 @@ async function handleFunCommands(message, command, args, _config) {
       return true;
     }
     case "ttt": {
+      let renderBoard2 = function() {
+        return board.slice(0, 3).join("") + "\n" + board.slice(3, 6).join("") + "\n" + board.slice(6, 9).join("");
+      }, checkWin2 = function(sym) {
+        return wins.some(([a, b, c]) => board[a] === sym && board[b] === sym && board[c] === sym);
+      };
+      var renderBoard = renderBoard2, checkWin = checkWin2;
       const board = Array(9).fill("\u2B1C");
       const symbols = ["\u274C", "\u2B55"];
       let current = 0;
       const players = [message.author.id, args[0]?.replace(/[<@!>]/g, "") || "bot"];
       const wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-      function renderBoard() {
-        return board.slice(0, 3).join("") + "\n" + board.slice(3, 6).join("") + "\n" + board.slice(6, 9).join("");
-      }
-      function checkWin(sym) {
-        return wins.some(([a, b, c]) => board[a] === sym && board[b] === sym && board[c] === sym);
-      }
       const msg = await message.channel.send({
-        embeds: [new EmbedBuilder4().setColor(5793266).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard() + `\n\n<@${players[current]}>'s turn (${symbols[current]})`)]
+        embeds: [new EmbedBuilder4().setColor(5793266).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard2() + `
+
+<@${players[current]}>'s turn (${symbols[current]})`)]
       });
       for (let move = 0; move < 9; move++) {
         const isBot = players[current] === "bot";
@@ -1222,17 +1240,25 @@ async function handleFunCommands(message, command, args, _config) {
             return true;
           }
           pos = parseInt(col.first().content) - 1;
-          try { await col.first().delete(); } catch {}
+          try {
+            await col.first().delete();
+          } catch {
+          }
         }
         board[pos] = symbols[current];
-        if (checkWin(symbols[current])) {
-          await msg.edit({ embeds: [new EmbedBuilder4().setColor(5763719).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard() + `\n\n\u{1F389} <@${players[current]}> wins!`)] });
+        if (checkWin2(symbols[current])) {
+          await msg.edit({ embeds: [new EmbedBuilder4().setColor(5763719).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard2() + `
+
+\u{1F389} <@${players[current]}> wins!`)] });
           return true;
         }
         current = current === 0 ? 1 : 0;
-        await msg.edit({ embeds: [new EmbedBuilder4().setColor(5793266).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard() + `\n\n<@${players[current]}>'s turn (${symbols[current]})\n*Type 1-9 to place*`)] });
+        await msg.edit({ embeds: [new EmbedBuilder4().setColor(5793266).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard2() + `
+
+<@${players[current]}>'s turn (${symbols[current]})
+*Type 1-9 to place*`)] });
       }
-      await msg.edit({ embeds: [new EmbedBuilder4().setColor(16705372).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard() + "\n\nIt's a tie!")] });
+      await msg.edit({ embeds: [new EmbedBuilder4().setColor(16705372).setTitle("\u274C\u2B55 Tic Tac Toe").setDescription(renderBoard2() + "\n\nIt's a tie!")] });
       return true;
     }
     case "meme": {
@@ -1270,7 +1296,10 @@ async function handleFunCommands(message, command, args, _config) {
       }
       const compatibility = Math.floor(Math.random() * 101);
       const msgIdx = Math.min(Math.floor((100 - compatibility) / 14), shipMessages.length - 1);
-      const embed = new EmbedBuilder4().setColor(16738740).setTitle("\u{1F495} Shipometer").setDescription(`<@${u1}> \u{1F49E} <@${u2}>\n\n**${compatibility}% Compatible!**\n${shipMessages[msgIdx]}`);
+      const embed = new EmbedBuilder4().setColor(16738740).setTitle("\u{1F495} Shipometer").setDescription(`<@${u1}> \u{1F49E} <@${u2}>
+
+**${compatibility}% Compatible!**
+${shipMessages[msgIdx]}`);
       await message.reply({ embeds: [embed] });
       return true;
     }
@@ -1278,7 +1307,9 @@ async function handleFunCommands(message, command, args, _config) {
       const target = args.join(" ") || message.author.username;
       const rating = Math.floor(Math.random() * 11);
       const stars = "\u2B50".repeat(rating) + "\u2606".repeat(10 - rating);
-      const embed = new EmbedBuilder4().setColor(16705372).setTitle("\u2B50 Rate").setDescription(`**${target}**\n${stars}\n**${rating}/10**`);
+      const embed = new EmbedBuilder4().setColor(16705372).setTitle("\u2B50 Rate").setDescription(`**${target}**
+${stars}
+**${rating}/10**`);
       await message.reply({ embeds: [embed] });
       return true;
     }
@@ -1298,7 +1329,8 @@ async function logMod(message, config, action, target, reason) {
     { name: "Moderator", value: `${message.author}`, inline: true },
     { name: "Reason", value: reason }
   ).setTimestamp();
-  await ch.send({ embeds: [embed] }).catch(() => {});
+  await ch.send({ embeds: [embed] }).catch(() => {
+  });
 }
 async function handleModerationCommands(message, command, args, config) {
   const guildId = message.guild.id;
@@ -1312,7 +1344,8 @@ async function handleModerationCommands(message, command, args, config) {
       }
       try {
         await message.guild.members.ban(targetId, { reason });
-        await message.reply({ embeds: [successEmbed("Banned", `<@${targetId}> has been banned.\n**Reason:** ${reason}`)] });
+        await message.reply({ embeds: [successEmbed("Banned", `<@${targetId}> has been banned.
+**Reason:** ${reason}`)] });
         await logMod(message, config, "Ban", `<@${targetId}>`, reason);
       } catch (e) {
         await message.reply({ embeds: [errorEmbed("Failed", "Could not ban that user.")] });
@@ -1329,7 +1362,8 @@ async function handleModerationCommands(message, command, args, config) {
       try {
         const member = await message.guild.members.fetch(targetId);
         await member.kick(reason);
-        await message.reply({ embeds: [successEmbed("Kicked", `<@${targetId}> has been kicked.\n**Reason:** ${reason}`)] });
+        await message.reply({ embeds: [successEmbed("Kicked", `<@${targetId}> has been kicked.
+**Reason:** ${reason}`)] });
         await logMod(message, config, "Kick", `<@${targetId}>`, reason);
       } catch {
         await message.reply({ embeds: [errorEmbed("Failed", "Could not kick that user.")] });
@@ -1348,7 +1382,8 @@ async function handleModerationCommands(message, command, args, config) {
       try {
         const member = await message.guild.members.fetch(targetId);
         await member.timeout(duration * 60 * 1e3, reason);
-        await message.reply({ embeds: [successEmbed("Muted", `<@${targetId}> has been timed out for **${duration} minutes**.\n**Reason:** ${reason}`)] });
+        await message.reply({ embeds: [successEmbed("Muted", `<@${targetId}> has been timed out for **${duration} minutes**.
+**Reason:** ${reason}`)] });
         await logMod(message, config, "Mute", `<@${targetId}>`, reason);
       } catch {
         await message.reply({ embeds: [errorEmbed("Failed", "Could not mute that user.")] });
@@ -1364,12 +1399,16 @@ async function handleModerationCommands(message, command, args, config) {
       }
       addWarning(guildId, targetId, message.author.id, reason);
       const warns = getWarnings(guildId, targetId);
-      await message.reply({ embeds: [successEmbed("Warning Issued", `<@${targetId}> has been warned.\n**Reason:** ${reason}\n**Total Warnings:** ${warns.length}`)] });
+      await message.reply({ embeds: [successEmbed("Warning Issued", `<@${targetId}> has been warned.
+**Reason:** ${reason}
+**Total Warnings:** ${warns.length}`)] });
       await logMod(message, config, "Warn", `<@${targetId}>`, reason);
       try {
         const member = await message.guild.members.fetch(targetId);
-        await member.user.send(`\u26A0\uFE0F You have been warned in **${message.guild.name}**: ${reason}`).catch(() => {});
-      } catch {}
+        await member.user.send(`\u26A0\uFE0F You have been warned in **${message.guild.name}**: ${reason}`).catch(() => {
+        });
+      } catch {
+      }
       return true;
     }
     case "warnings": {
@@ -1403,7 +1442,8 @@ async function handleModerationCommands(message, command, args, config) {
       const amount = Math.min(100, parseInt(args[0]) || 10);
       await message.channel.bulkDelete(amount + 1, true);
       const msg = await message.channel.send({ embeds: [successEmbed("Purged", `Deleted ${amount} messages.`)] });
-      setTimeout(() => msg.delete().catch(() => {}), 3e3);
+      setTimeout(() => msg.delete().catch(() => {
+      }), 3e3);
       return true;
     }
     default:
@@ -1564,7 +1604,8 @@ function handleMessageCreate(client2) {
       console.error(`Error handling command ${command}:`, err);
       try {
         await message.reply({ embeds: [errorEmbed("Error", "Something went wrong.")] });
-      } catch {}
+      } catch {
+      }
     }
   });
 }
@@ -1593,7 +1634,8 @@ function handleInteractionCreate(client2) {
         if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
           await interaction.reply({ embeds: [errorEmbed("Error", "Something went wrong.")], ephemeral: true });
         }
-      } catch {}
+      } catch {
+      }
     }
   });
 }
@@ -1620,7 +1662,8 @@ async function handleButton(btn) {
     const roleId = customId.replace("cc_role_give_", "");
     const m = btn.guild.members.cache.get(btn.user.id);
     if (m) {
-      await m.roles.add(roleId).catch(() => {});
+      await m.roles.add(roleId).catch(() => {
+      });
       await btn.reply({ embeds: [successEmbed("Role Given", `You've been given <@&${roleId}>`)], ephemeral: true });
     }
     return;
@@ -1629,7 +1672,8 @@ async function handleButton(btn) {
     const roleId = customId.replace("cc_role_remove_", "");
     const m = btn.guild.members.cache.get(btn.user.id);
     if (m) {
-      await m.roles.remove(roleId).catch(() => {});
+      await m.roles.remove(roleId).catch(() => {
+      });
       await btn.reply({ embeds: [successEmbed("Role Removed", `Role <@&${roleId}> removed`)], ephemeral: true });
     }
     return;
@@ -1639,10 +1683,12 @@ async function handleButton(btn) {
     const m = btn.guild.members.cache.get(btn.user.id);
     if (m) {
       if (m.roles.cache.has(roleId)) {
-        await m.roles.remove(roleId).catch(() => {});
+        await m.roles.remove(roleId).catch(() => {
+        });
         await btn.reply({ embeds: [successEmbed("Role Removed", `Role <@&${roleId}> removed`)], ephemeral: true });
       } else {
-        await m.roles.add(roleId).catch(() => {});
+        await m.roles.add(roleId).catch(() => {
+        });
         await btn.reply({ embeds: [successEmbed("Role Given", `You've been given <@&${roleId}>`)], ephemeral: true });
       }
     }
@@ -1767,7 +1813,8 @@ async function handleCloseTicket(btn) {
   setTimeout(async () => {
     try {
       await btn.channel?.delete();
-    } catch {}
+    } catch {
+    }
   }, 5e3);
 }
 async function handleClaimTicket(btn) {
@@ -1795,15 +1842,25 @@ async function handleBlunderblussAccept(btn) {
   const guild = btn.guild;
   const HITTER_ROLE_ID = "1408644461050855584";
   const member = await guild.members.fetch(btn.user.id);
-  await member.roles.add(HITTER_ROLE_ID).catch(() => {});
+  await member.roles.add(HITTER_ROLE_ID).catch(() => {
+  });
   const embed = new EmbedBuilder6().setColor(5763719).setTitle("Congratulations!").setDescription(`You're now a **Hitter**! You can proceed to <#1454384283165917351> to hangout with other hitters.`).setTimestamp();
   await btn.reply({ embeds: [embed] });
   try {
     const dmEmbed = new EmbedBuilder6().setColor(5793266).setTitle("Welcome, Hitter!").setDescription(
-      `Welcome to the team! You can now start hitting and be rich!\n\n**If you're new to hitting:**\n\u2022 Alt hit: <#1477528228053651631>\n\u2022 Normal hit: <#1477528678278889483>\n\u2022 More resources: <#1454384093390311444> and <#1495346357647704186>\n\u2022 Fake proofs: <#1477532655081984011>\n\nGood luck and get that bag! \u{1F4B0}`
+      `Welcome to the team! You can now start hitting and be rich!
+
+**If you're new to hitting:**
+\u2022 Alt hit: <#1477528228053651631>
+\u2022 Normal hit: <#1477528678278889483>
+\u2022 More resources: <#1454384093390311444> and <#1495346357647704186>
+\u2022 Fake proofs: <#1477532655081984011>
+
+Good luck and get that bag! \u{1F4B0}`
     ).setTimestamp();
     await btn.user.send({ embeds: [dmEmbed] });
-  } catch {}
+  } catch {
+  }
 }
 
 // src/events/guildMemberAdd.ts
@@ -1820,12 +1877,13 @@ function handleGuildMemberAdd(client2) {
       { name: "Member #", value: `${member.guild.memberCount}`, inline: true }
     ).setTimestamp();
     if (config.welcome_banner) embed.setImage(config.welcome_banner);
-    await channel.send({ embeds: [embed] }).catch(() => {});
+    await channel.send({ embeds: [embed] }).catch(() => {
+    });
   });
 }
 
 // src/events/antiSpam.ts
-var spamMap = new Map();
+var spamMap = /* @__PURE__ */ new Map();
 var URL_REGEX = /(https?:\/\/|discord\.gg\/|discord\.com\/invite\/)/i;
 function handleAntiSpam(client2) {
   client2.on("messageCreate", async (message) => {
@@ -1833,12 +1891,14 @@ function handleAntiSpam(client2) {
     if (message.member.permissions.has(BigInt(8))) return;
     const config = getGuildConfig(message.guild.id);
     if (config.anti_link && URL_REGEX.test(message.content)) {
-      await message.delete().catch(() => {});
+      await message.delete().catch(() => {
+      });
       const warn = await message.channel.send({
         content: `${message.author}`,
         embeds: [errorEmbed("No Links", "Links are not allowed in this server.")]
       });
-      setTimeout(() => warn.delete().catch(() => {}), 5e3);
+      setTimeout(() => warn.delete().catch(() => {
+      }), 5e3);
       return;
     }
     if (config.anti_spam) {
@@ -1855,8 +1915,10 @@ function handleAntiSpam(client2) {
               content: `${message.author}`,
               embeds: [errorEmbed("Spam Detected", "You've been timed out for 30 seconds.")]
             });
-            setTimeout(() => warn.delete().catch(() => {}), 5e3);
-          } catch {}
+            setTimeout(() => warn.delete().catch(() => {
+            }), 5e3);
+          } catch {
+          }
           return;
         }
         current.timer = setTimeout(() => spamMap.delete(key), 5e3);
@@ -1871,7 +1933,7 @@ function handleAntiSpam(client2) {
 
 // src/events/autoVouch.ts
 import { EmbedBuilder as EmbedBuilder8 } from "discord.js";
-var lastVouchTime = new Map();
+var lastVouchTime = /* @__PURE__ */ new Map();
 function startAutoVouch(client2) {
   setInterval(async () => {
     const guilds = db.prepare(
@@ -1907,12 +1969,25 @@ function startAutoVouch(client2) {
           const targetMember = await guild.members.fetch(vouchedUserId);
           vouchedUserUsername = targetMember.user.username;
           vouchedUserAvatarUrl = targetMember.displayAvatarURL({ size: 256 });
-        } catch {}
+        } catch {
+        }
         const embed = new EmbedBuilder8().setColor(5793266).setTitle("\u2B50 New Vouch!").setDescription(`<@${vouchedBy}> vouched for <@${vouchedUserId}>`).addFields(
-          { name: "Vouched User", value: `${vouchedUserUsername} (<@${vouchedUserId}>)` },
-          { name: "Vouched By", value: `${vouchedByUsername} (<@${vouchedBy}>)` },
-          { name: "Total Vouches", value: `\u2B50 ${newCount}` },
-          { name: "User ID", value: vouchedUserId }
+          {
+            name: "Vouched User",
+            value: `${vouchedUserUsername} (<@${vouchedUserId}>)`
+          },
+          {
+            name: "Vouched By",
+            value: `${vouchedByUsername} (<@${vouchedBy}>)`
+          },
+          {
+            name: "Total Vouches",
+            value: `\u2B50 ${newCount}`
+          },
+          {
+            name: "User ID",
+            value: vouchedUserId
+          }
         ).setTimestamp();
         if (vouchedUserAvatarUrl) embed.setThumbnail(vouchedUserAvatarUrl);
         await channel.send({
