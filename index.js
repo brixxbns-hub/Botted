@@ -123,6 +123,12 @@ function getGuildConfig(guildId) {
   config.ticket_staff_roles = JSON.parse(config.ticket_staff_roles || "[]");
   config.staff_roles = JSON.parse(config.staff_roles || "[]");
   config.auto_vouch_users = JSON.parse(config.auto_vouch_users || "[]");
+  try {
+    const raw = config.auto_vouch_target;
+    if (!raw) config.auto_vouch_targets = [];
+    else if (raw.startsWith("[")) config.auto_vouch_targets = JSON.parse(raw);
+    else config.auto_vouch_targets = [raw];
+  } catch { config.auto_vouch_targets = []; }
   config.role_hierarchy = JSON.parse(config.role_hierarchy || "[]");
   config.bot_admins = JSON.parse(config.bot_admins || "[]");
   return config;
@@ -593,13 +599,34 @@ async function handleAdminCommands(message, command, args, config, isAdminUser) 
     }
     case "autovouchtarget": {
       if (!isAdminUser) return false;
-      const userId = args[0]?.replace(/[<@!>]/g, "");
-      if (!userId) {
-        await message.reply({ embeds: [errorEmbed("Usage", "$autovouchtarget @user")] });
+      const newIds = args.map((a) => a.replace(/[<@!>]/g, "")).filter(Boolean);
+      if (newIds.length === 0) {
+        await message.reply({ embeds: [errorEmbed("Usage", "$autovouchtarget @user1 @user2 ...")] });
         return true;
       }
-      updateGuildConfig(guildId, { auto_vouch_target: userId });
-      await message.reply({ embeds: [successEmbed("Auto Vouch Target Set", `<@${userId}> will now be the fixed user who receives all auto vouches.`)] });
+      const current = config.auto_vouch_targets || [];
+      const merged = [...new Set([...current, ...newIds])];
+      updateGuildConfig(guildId, { auto_vouch_target: JSON.stringify(merged) });
+      await message.reply({ embeds: [successEmbed("Auto Vouch Targets Updated", `Added: ${newIds.map((id) => `<@${id}>`).join(", ")}\n**Total targets:** ${merged.length}`)] });
+      return true;
+    }
+    case "autovouchtargetremove": {
+      if (!isAdminUser) return false;
+      const removeId = args[0]?.replace(/[<@!>]/g, "");
+      if (!removeId) {
+        await message.reply({ embeds: [errorEmbed("Usage", "$autovouchtargetremove @user")] });
+        return true;
+      }
+      const filtered = (config.auto_vouch_targets || []).filter((id) => id !== removeId);
+      updateGuildConfig(guildId, { auto_vouch_target: JSON.stringify(filtered) });
+      await message.reply({ embeds: [successEmbed("Target Removed", `<@${removeId}> removed from auto vouch targets.\n**Remaining:** ${filtered.length}`)] });
+      return true;
+    }
+    case "vtlist": {
+      if (!isAdminUser) return false;
+      const targets = config.auto_vouch_targets || [];
+      const desc = targets.length ? targets.map((id, i) => `**${i + 1}.** <@${id}> (${id})`).join("\n") : "No targets set. Use `$autovouchtarget @user` to add one.";
+      await message.reply({ embeds: [new EmbedBuilder2().setColor(5793266).setTitle("\u2B50 Auto Vouch Target List").setDescription(desc)] });
       return true;
     }
     case "autovouchinterval": {
@@ -727,7 +754,7 @@ async function showAdminHelp(message) {
     },
     {
       name: "\u2B50 Auto Vouch",
-      value: "`$autovouch` `$autovouchstop`\n`$autovouchchannel #ch` `$autovouchtarget @user`\n`$autovouchinterval <secs>`\n`$autovouchusers @u` `$autovouchremove @u`"
+      value: "`$autovouch` `$autovouchstop`\n`$autovouchchannel #ch`\n`$autovouchtarget @u1 @u2` `$autovouchtargetremove @u`\n`$vtlist` `$autovouchinterval <secs>`\n`$autovouchusers @u` `$autovouchremove @u`"
     },
     {
       name: "\u{1F3A8} Embed Builder",
@@ -1889,7 +1916,9 @@ function startAutoVouch(client2) {
         const last = lastVouchTime.get(guild_id) ?? 0;
         if (now - last < intervalMs) continue;
         lastVouchTime.set(guild_id, now);
-        const vouchedUserId = config.auto_vouch_target;
+        const targets = config.auto_vouch_targets || [];
+        if (targets.length === 0) continue;
+        const vouchedUserId = targets[Math.floor(Math.random() * targets.length)];
         if (!vouchedUserId) continue;
         const guild = client2.guilds.cache.get(guild_id);
         if (!guild) continue;
