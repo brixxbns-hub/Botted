@@ -1547,9 +1547,13 @@ async function handleRoleCommands(message, command, args, config) {
 }
 
 // src/events/messageCreate.ts
+var _processedMsgIds = new Set();
 function handleMessageCreate(client2) {
   client2.on("messageCreate", async (message) => {
     if (message.author.bot || !message.guild) return;
+    if (_processedMsgIds.has(message.id)) return;
+    _processedMsgIds.add(message.id);
+    setTimeout(() => _processedMsgIds.delete(message.id), 5e3);
     const config = getGuildConfig(message.guild.id);
     const prefix = config.prefix || "$";
     if (!message.content.startsWith(prefix)) return;
