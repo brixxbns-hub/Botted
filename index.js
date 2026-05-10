@@ -1,5 +1,7 @@
 import { createRequire } from 'node:module';
 globalThis.require = createRequire(import.meta.url);
+import startServer from './server.js';
+startServer();
 
 // src/index.ts
 import { Client as Client6, GatewayIntentBits, Partials } from "discord.js";
