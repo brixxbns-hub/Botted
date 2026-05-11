@@ -99,6 +99,12 @@ db.exec(`
     guild_id TEXT PRIMARY KEY,
     last_user_id TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS client_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT NOT NULL,
+    message TEXT NOT NULL
+  );
 `);
 var existingCols = db.prepare("PRAGMA table_info(guild_config)").all();
 var colNames = existingCols.map((c) => c.name);
@@ -160,6 +166,20 @@ function addVouch(guildId, userId, amount = 1) {
 }
 function getVouchLeaderboard(guildId) {
   return db.prepare("SELECT user_id, count FROM vouches WHERE guild_id = ? ORDER BY count DESC LIMIT 10").all(guildId);
+}
+function addClientFeedback(guildId, message) {
+  db.prepare("INSERT INTO client_feedback (guild_id, message) VALUES (?, ?)").run(guildId, message);
+}
+function getClientFeedback(guildId) {
+  return db.prepare("SELECT id, message FROM client_feedback WHERE guild_id = ? ORDER BY id ASC").all(guildId);
+}
+function removeClientFeedback(guildId, id) {
+  db.prepare("DELETE FROM client_feedback WHERE guild_id = ? AND id = ?").run(guildId, id);
+}
+function getRandomClientFeedback(guildId) {
+  const all = getClientFeedback(guildId);
+  if (all.length === 0) return null;
+  return all[Math.floor(Math.random() * all.length)].message;
 }
 function addWarning(guildId, userId, moderatorId, reason) {
   db.prepare(
@@ -754,7 +774,7 @@ async function showAdminHelp(message) {
     },
     {
       name: "\u2B50 Auto Vouch",
-      value: "`$autovouch` `$autovouchstop`\n`$autovouchchannel #ch`\n`$autovouchtarget @u1 @u2` `$autovouchtargetremove @u`\n`$vtlist` `$autovouchinterval <secs>`\n`$autovouchusers @u` `$autovouchremove @u`"
+      value: "`$autovouch` `$autovouchstop`\n`$autovouchchannel #ch`\n`$autovouchtarget @u1 @u2` `$autovouchtargetremove @u`\n`$vtlist` `$autovouchinterval <secs>`\n`$autovouchusers @u` `$autovouchremove @u`\n`$addcf <msg>` `$removecf <id>` `$cflist`"
     },
     {
       name: "\u{1F3A8} Embed Builder",
@@ -1103,6 +1123,37 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
       setVouches(guildId, targetId, amount);
       const embed = new EmbedBuilder3().setColor(16705372).setTitle("\u2B50 Vouches Set").setDescription(`<@${targetId}>'s vouches have been set to **${amount}**.`).setTimestamp();
       await message.reply({ embeds: [embed] });
+      return true;
+    }
+    case "addcf": {
+      if (!isAdminUser) return false;
+      const msg = args.join(" ").trim();
+      if (!msg) {
+        await message.reply({ embeds: [errorEmbed("Usage", "$addcf <feedback message>")] });
+        return true;
+      }
+      addClientFeedback(guildId, msg);
+      await message.reply({ embeds: [successEmbed("Feedback Added", `\u201C${msg}\u201D has been added to the client feedback pool.`)] });
+      return true;
+    }
+    case "cflist": {
+      if (!isAdminUser) return false;
+      const feedbacks = getClientFeedback(guildId);
+      const desc = feedbacks.length
+        ? feedbacks.map((f) => `**#${f.id}** \u2014 ${f.message}`).join("\n")
+        : "No feedback messages yet. Use `$addcf <message>` to add one.";
+      await message.reply({ embeds: [new EmbedBuilder3().setColor(5793266).setTitle("\u{1F4AC} Client Feedback Pool").setDescription(desc)] });
+      return true;
+    }
+    case "removecf": {
+      if (!isAdminUser) return false;
+      const id = parseInt(args[0]);
+      if (isNaN(id)) {
+        await message.reply({ embeds: [errorEmbed("Usage", "$removecf <id> — use $cflist to see IDs")] });
+        return true;
+      }
+      removeClientFeedback(guildId, id);
+      await message.reply({ embeds: [successEmbed("Feedback Removed", `Entry #${id} has been removed.`)] });
       return true;
     }
     case "roleinfo": {
@@ -1966,12 +2017,14 @@ function startAutoVouch(client2) {
           vouchedUserUsername = targetMember.user.username;
           vouchedUserAvatarUrl = targetMember.displayAvatarURL({ size: 256 });
         } catch {}
-        const embed = new EmbedBuilder8().setColor(5793266).setTitle("\u2B50 New Vouch!").setDescription(`<@${vouchedBy}> vouched for <@${vouchedUserId}>`).addFields(
+        const randomFeedback = getRandomClientFeedback(guild_id);
+        const embedFields = [
           { name: "Vouched User", value: `${vouchedUserUsername} (<@${vouchedUserId}>)` },
           { name: "Vouched By", value: `${vouchedByUsername} (<@${vouchedBy}>)` },
-          { name: "Total Vouches", value: `\u2B50 ${newCount}` },
-          { name: "User ID", value: vouchedUserId }
-        ).setTimestamp();
+          { name: "Total Vouches", value: `\u2B50 ${newCount}` }
+        ];
+        if (randomFeedback) embedFields.push({ name: "\u{1F4AC} Client Feedback", value: `\u201C${randomFeedback}\u201D` });
+        const embed = new EmbedBuilder8().setColor(5793266).setTitle("\u2B50 New Vouch!").setDescription(`<@${vouchedBy}> vouched for <@${vouchedUserId}>`).addFields(...embedFields);
         if (vouchedUserAvatarUrl) embed.setThumbnail(vouchedUserAvatarUrl);
         await channel.send({
           content: `\u{1F389} <@${vouchedUserId}> received +1 vouch!`,
