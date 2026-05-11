@@ -782,7 +782,7 @@ async function showAdminHelp(message) {
     },
     {
       name: "\u{1F4BC} Middleman",
-      value: "`$mmfee [amount]` `$mminfo` `$mminfo setimage <url>`\n`$blunderbluss` `$confirm` `$close` `$claim`\n`$w @user` `$userinfo @user` `$serverinfo`\n`$vouches @user` `$vouchlb` `$setvouches @user <n>`\n`$roleinfo @role`"
+      value: "`$mmfee [amount]` `$mminfo` `$mminfo setimage <url>`\n`$safety` `$blunderbluss` `$confirm` `$close` `$claim`\n`$w @user` `$userinfo @user` `$serverinfo`\n`$vouches @user` `$vouchlb` `$setvouches @user <n>`\n`$roleinfo @role`"
     },
     {
       name: "\u{1F3AE} Fun",
@@ -859,6 +859,27 @@ async function handleMiddlemanCommands(message, command, args, config, isAdminUs
         new ButtonBuilder3().setCustomId("mminfo_not_understood").setLabel("Not Understood").setStyle(ButtonStyle3.Danger).setEmoji("\u2753")
       );
       await message.channel.send({ embeds: [embed], components: [row] });
+      await message.delete().catch(() => {});
+      return true;
+    }
+    case "safety": {
+      if (!isAdminUser) return false;
+      const safetyEmbed = new EmbedBuilder3()
+        .setColor(5793266)
+        .setDescription(
+          "\u{1F504} **__Refund & Anti-Scam Policy__**\n\n" +
+          "\u2022 If one party fails to complete their side of the trade, the middleman will securely refund the item or payment to the rightful owner.\n\n" +
+          "\u26A0\uFE0F **__Important:__**\n\n" +
+          "\u2022 Any attempt to scam, deceive, or abandon a trade may result in \u{1F504}\n\n" +
+          "\u2022 \ud83d\udd12 Immediate blacklist from middleman services\n" +
+          "\u2022 \ud83e\udd16 Permanent ban from the server\n" +
+          "\u2022 \ud83c\uddec\ud83c\uddf1 Loss of trust & recorded reports against your account\n\n" +
+          "**__Our system ensures:__**\n\n" +
+          "\u2022 No one loses items unfairly\n" +
+          "\u2022 Trades remain fully protected\n" +
+          "\u2022 Scammers are dealt with strictly"
+        );
+      await message.channel.send({ embeds: [safetyEmbed] });
       await message.delete().catch(() => {});
       return true;
     }
